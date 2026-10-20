@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#08080b">
+  <title>NOVA AI</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #08080b;
+      color: #f5f5f7;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 18px;
+      border-bottom: 1px solid #292027;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .core {
+      width: 44px;
+      height: 44px;
+      border: 2px solid #ff334d;
+      border-radius: 50%;
+      box-shadow: 0 0 22px #ff243b66,
+                  inset 0 0 15px #ff243b44;
+      display: grid;
+      place-items: center;
+      color: #ff5268;
+      font-weight: 800;
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+      letter-spacing: 3px;
+    }
+
+    .status {
+      color: #a6a0aa;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 760px;
+      flex: 1;
+      margin: 0 auto;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #welcome {
+      text-align: center;
+      margin: auto 0;
+      padding: 36px 0;
+    }
+
+    #welcome .core {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 24px;
+      font-size: 28px;
+      border-width: 3px;
+      box-shadow: 0 0 45px #ff243b55,
+                  inset 0 0 25px #ff243b33;
+    }
+
+    #welcome h2 {
+      font-size: clamp(24px, 6vw, 36px);
+      margin-bottom: 10px;
+    }
+
+    #welcome p {
+      color: #aaa4b0;
+      line-height: 1.6;
+    }
+
+    #chat {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding-bottom: 20px;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 13px 16px;
+      border-radius: 17px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: #38121b;
+      border: 1px solid #68202f;
+    }
+
+    .nova {
+      align-self: flex-start;
+      background: #151419;
+      border: 1px solid #302a32;
+    }
+
+    .label {
+      color: #ff6477;
+      font-size: 11px;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .composer {
+      position: sticky;
+      bottom: 0;
+      padding: 12px 0 8px;
+      background: #08080b;
+    }
+
+    form {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid #44303a;
+      border-radius: 18px;
+      background: #121116;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 8px;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      color: white;
+      font: inherit;
+      font-size: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 15px;
+      background: #ed3048;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid #ff7181;
+      outline-offset: 3px;
+    }
+
+    #send:disabled { opacity: .5; }
+
+    .note {
+      color: #817b87;
+      text-align: center;
+      font-size: 11px;
+      margin: 12px 0 0;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="core">N</div>
+    <div>
+      <h1>NOVA AI</h1>
+      <div class="status">● INTERFACE ONLINE</div>
+    </div>
+  </header>
+
+  <main>
+    <section id="welcome">
+      <div class="core">N</div>
+      <h2>What's on your mind?</h2>
+      <p>Your ideas. Your questions. One conversation.</p>
+    </section>
+
+    <section id="chat"
+             aria-live="polite"
+             aria-label="Conversation"></section>
+
+    <section class="composer">
+      <form id="form">
+        <input id="input"
+               type="text"
+               placeholder="Message NOVA..."
+               aria-label="Message NOVA"
+               autocomplete="off"
+               maxlength="2000"
+               required>
+        <button id="send" type="submit">Send ↑</button>
+      </form>
+      <p class="note">
+        Demo mode · AI connection not configured yet
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const chat = document.getElementById("chat");
+    const welcome = document.getElementById("welcome");
+    const send = document.getElementById("send");
+
+    const history = [];
+
+    function addMessage(role, text) {
+      welcome.hidden = true;
+
+      const bubble = document.createElement("div");
+      bubble.className = "message " + role;
+
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = role === "user" ? "YOU" : "NOVA";
+
+      const content = document.createElement("div");
+      content.textContent = text;
+
+      bubble.append(label, content);
+      chat.appendChild(bubble);
+
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+
+    function demoReply(text) {
+      const message = text.toLowerCase();
+
+      if (/^(hi|hello|hey|yo)\b/.test(message)) {
+        return "Hey bro! 🔴 NOVA is online. What's happening?";
+      }
+
+      if (message.includes("your name")) {
+        return "I'm NOVA — your future AI assistant. We're building me one feature at a time.";
+      }
+
+      if (message.includes("who are you")) {
+        return "I'm NOVA AI. Right now, I'm running in demo mode. My real AI brain is our next major milestone.";
+      }
+
+      if (message.includes("joke") || message.includes("funny")) {
+        return "Why did the AI go to school? To improve its processing skills. 🤖";
+      }
+
+      if (message.includes("help")) {
+        return "I'm here, bro. This version is a working interface demo. Next, we'll connect a real AI model.";
+      }
+
+      return "I hear you, bro. 🔴 My demo brain can't answer that properly yet. We'll connect a real AI model in a later step.";
+    }
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage("user", text);
+      history.push({ role: "user", text });
+
+      input.value = "";
+      send.disabled = true;
+
+      const reply = demoReply(text);
+
+      setTimeout(function() {
+        addMessage("nova", reply);
+        history.push({ role: "nova", text: reply });
+        send.disabled = false;
+        input.focus();
+      }, 350);
+    });
+  </script>
+</body>
+</html>
